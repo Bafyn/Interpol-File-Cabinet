@@ -51,15 +51,9 @@ namespace Interpol_file_cabinet.DataAction
 
             foreach (Group gr in MyCollection.groups)
             {
-                sw.WriteLine(gr.Name + " " + gr.criminalsInGroup.Count);
-                foreach (Criminal cr in gr.criminalsInGroup)
-                {
-                    string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}",
-                        cr.Surname, cr.Name, cr.Patronymic, cr.Nickname, cr.PlaceOfBirth, cr.DateOfBirth,
-                        cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession, cr.Group);
-                    sw.WriteLine(temp);
-                }
-                sw.WriteLine("--*--");
+                sw.WriteLine(gr.Name + "$" + gr.CountOfCriminals);
+
+                sw.WriteLine("--|--");
             }
 
             ActionsWithFields.wasChangedData = false;
@@ -99,16 +93,8 @@ namespace Interpol_file_cabinet.DataAction
                         if (temp == null)
                             break;
                         tempStr = temp.Split('|');
-                        numOfPart++;
-                    }
-
-                    while (tempStr[0] == "--*--")
-                    {
-                        group.criminalsInGroup.Clear();
-                        string temp = sr.ReadLine();
-                        if (temp == null)
-                            break;
-                        tempStr = temp.Split('|');
+                        if (numOfPart != 3)
+                            numOfPart++;
                     }
 
                     if (sr.EndOfStream)
@@ -122,23 +108,11 @@ namespace Interpol_file_cabinet.DataAction
                             crim.Group = tempStr[11];
                     }
 
-                    if (numOfPart == 3 && tempStr.Length == 1)
+                    if (numOfPart >= 3 && tempStr.Length == 1)
                     {
-                        int numOfCrims = Convert.ToInt32(tempStr[0].Split('$')[1]);
+                        group.CountOfCriminals = Convert.ToInt32(tempStr[0].Split('$')[1]);
 
                         group.Name = tempStr[0].Split('$')[0];
-
-                        for (int i = 0; i < numOfCrims; i++)
-                        {
-                            tempStr = sr.ReadLine().Split('|');
-
-                            crim = new Criminal(tempStr[0], tempStr[1], tempStr[2], tempStr[3], tempStr[4], tempStr[5],
-                                Convert.ToDouble(tempStr[6]), Convert.ToDouble(tempStr[7]), tempStr[8], tempStr[9], tempStr[10]);
-                            crim.Group = tempStr[11];
-
-                            group.criminalsInGroup.Add(crim);
-                        }
-
                     }
 
                     switch (numOfPart)
