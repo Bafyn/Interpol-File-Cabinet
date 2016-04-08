@@ -9,24 +9,25 @@ namespace Interpol_file_cabinet.Model
     public class Group
     {
         // Свойства
-        public string Name { get; set; }
-        public List<Criminal> criminalsInGroup = new List<Criminal>();
+        public int CountOfCriminals;
+        public string Name;
 
         // Конструктор с параметрами
-        public Group(string name, List<Criminal> crims)
+        public Group()
         {
-            Name = name;
-            criminalsInGroup = crims;
+            this.Name = "";
+            CountOfCriminals = 0;
         }
 
-        // Конструктор копирования
+        public Group(string name)
+        {
+            this.Name = name;
+        }
+
         public Group(Group gr)
         {
-            this.Name = gr.Name;
-            this.criminalsInGroup = new List<Criminal>(gr.criminalsInGroup);
+            CountOfCriminals = gr.CountOfCriminals;
+            Name = gr.Name;
         }
-
-        // Конструктор по умолчанию
-        public Group() { }
     }
 }
