@@ -215,6 +215,7 @@ namespace Interpol_file_cabinet
             dataGVCriminals.CurrentRow.Cells[9].Value = crim.SpecialSigns;
             dataGVCriminals.CurrentRow.Cells[10].Value = crim.Profession;
 
+            crim.Group = dataGVCriminals.CurrentRow.Cells[11].Value.ToString();
             // Добавить уже отредактированного преступника
             MyCollection.criminals.Insert(ind, crim);
         }
@@ -269,14 +270,14 @@ namespace Interpol_file_cabinet
             // Удалить перступника с главной панели
             MyCollection.criminals.Remove(newCrim);
 
-            // Если преступник состоит в группировке, удалить его и оттуда
+            // Если преступник состоит в группировке, удалить его и оттуда(уменьшить кол-во членов)
             if (newCrim.Group != "")
             {
-                foreach (Group group in MyCollection.groups)
+                for (int i = 0; i < MyCollection.groups.Count; i++)
                 {
-                    if (group.Name == newCrim.Group)
+                    if (MyCollection.groups[i].Name == newCrim.Group)
                     {
-                        group.criminalsInGroup.Remove(newCrim);
+                        MyCollection.groups[i].CountOfCriminals--;
                         break;
                     }
                 }
@@ -285,7 +286,10 @@ namespace Interpol_file_cabinet
                 foreach (DataGridViewRow row in dataGVGroups.Rows)
                 {
                     if (row.Cells[0].Value.ToString() == newCrim.Group)
+                    {
                         row.Cells[1].Value = (Convert.ToInt32(row.Cells[1].Value) - 1).ToString();
+                        break;
+                    }
                 }
             }
 
@@ -465,22 +469,14 @@ namespace Interpol_file_cabinet
         // Показать преступников, состоящих в группировке, при выборе группировки
         private void dataGVGroups_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
-            Group group = new Group();
-
             dataGVMembers.Rows.Clear();
 
-            foreach (Group gr in MyCollection.groups)
+            foreach (Criminal crim in MyCollection.criminals)
             {
-                if (gr.Name == dataGVGroups.CurrentRow.Cells[0].Value.ToString())
+                if (crim.Group == dataGVGroups.CurrentRow.Cells[0].Value.ToString())
                 {
-                    group = gr;
-                    break;
+                    dataGVMembers.Rows.Add(ActionsWithFields.CreateRowOfCriminal(crim, false, false));
                 }
-            }
-
-            foreach (Criminal crim in group.criminalsInGroup)
-            {
-                dataGVMembers.Rows.Add(ActionsWithFields.CreateRowOfCriminal(crim, false, false));
             }
         }
 
@@ -502,19 +498,19 @@ namespace Interpol_file_cabinet
                 {
                     if (MyCollection.groups[i].Name == dataGVGroups.CurrentRow.Cells[0].Value.ToString())
                     {
-                        foreach (Criminal crim in MyCollection.groups[i].criminalsInGroup)
-                        {
-                            MyCollection.criminals.Find(key => key == crim).Group = "";
-
-                            ChangeGroupOfCriminalInRow(crim, "");
-                        }
-
                         MyCollection.groups.Remove(MyCollection.groups[i]);
-                        dataGVGroups.Rows.Remove(dataGVGroups.CurrentRow);
-
-                        break;
                     }
                 }
+
+                for (int j = 0; j < MyCollection.criminals.Count; j++)
+                {
+                    if (MyCollection.criminals[j].Group == dataGVGroups.CurrentRow.Cells[0].Value.ToString())
+                    {
+                        ChangeGroupOfCriminalInRow(MyCollection.criminals[j], "");
+                        MyCollection.criminals[j].Group = "";
+                    }
+                }
+                dataGVGroups.Rows.Remove(dataGVGroups.CurrentRow);
             }
         }
 
@@ -536,9 +532,9 @@ namespace Interpol_file_cabinet
 
                     MyCollection.criminals.Find(key => key == crim).Group = "";
                     ChangeGroupOfCriminalInRow(crim, "");
-                    MyCollection.groups[i].criminalsInGroup.Remove(crim);
+                    MyCollection.groups[i].CountOfCriminals--;
                     dataGVMembers.Rows.Remove(dataGVMembers.CurrentRow);
-                    dataGVGroups.CurrentRow.Cells[1].Value = Convert.ToInt32(dataGVGroups.CurrentRow.Cells[1].Value) - 1;
+                    dataGVGroups.CurrentRow.Cells[1].Value = MyCollection.groups[i].CountOfCriminals;
 
                     break;
                 }
