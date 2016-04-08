@@ -21,7 +21,6 @@ namespace Interpol_file_cabinet.Forms
 
         MainForm Mform;
         Group group = new Group();
-        Group oldGroup;
 
         // Запись в DataGridView всех преступников, не состоящих ни в одной из группировок
         private void Add_Group_Load(object sender, EventArgs e)
@@ -54,7 +53,8 @@ namespace Interpol_file_cabinet.Forms
                 {
                     if (textBGroupName.ReadOnly == true)
                     {
-                        oldGroup = gr;
+                        group = gr;
+                        break;
                     }
                     else
                     {
@@ -65,7 +65,6 @@ namespace Interpol_file_cabinet.Forms
             }
 
             Mform = (MainForm)Owner;
-            List<Criminal> listOfCriminals = new List<Criminal>();
             group.Name = textBGroupName.Text;
 
             // Добавление всех отмеченных преступников в группировку
@@ -83,18 +82,12 @@ namespace Interpol_file_cabinet.Forms
 
                     // Если форма открыта для добавления преступников в существующую группировку(поле с названием группировки
                     //доступно только для чтения)
-                    if (textBGroupName.ReadOnly == false)
+                    if (textBGroupName.ReadOnly == true)
                     {
-                        crim.Group = textBGroupName.Text;
-                        listOfCriminals.Add(crim);
-                    }
-                    else
-                    {
-                        oldGroup.criminalsInGroup.Add(crim);
                         Mform.IncrNumOfCriminalsInGroupInDataGV();
                         Mform.AddCriminal(crim, 3, false, false);
                     }
-
+                    group.CountOfCriminals++;
                     isCBabs = false;
                 }
             }
@@ -108,8 +101,7 @@ namespace Interpol_file_cabinet.Forms
             // Добавить строчку с группировкой в DataGridView
             if (textBGroupName.ReadOnly == false)
             {
-                group.criminalsInGroup = listOfCriminals;
-                MyCollection.groups.Add(new Group(group));
+                MyCollection.groups.Add(group);
                 Mform.AddGroupToDataGV(ActionsWithFields.CreateRowOfGroup(group));
             }
 
