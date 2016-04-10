@@ -27,33 +27,36 @@ namespace Interpol_file_cabinet.DataAction
                 string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}",
                     cr.Surname, cr.Name, cr.Patronymic, cr.Nickname, cr.PlaceOfBirth, cr.DateOfBirth,
                     cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession, cr.Group);
-                sw.WriteLine(temp);
+
+                sw.WriteLine(new string(EncryptData(temp)));
             }
-            sw.WriteLine("--|--");
+            sw.WriteLine(new string(EncryptData("--|--")));
 
             foreach (Criminal cr in MyCollection.criminalsArchive)
             {
                 string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|",
                     cr.Surname, cr.Name, cr.Patronymic, cr.Nickname, cr.PlaceOfBirth, cr.DateOfBirth,
                     cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession);
-                sw.WriteLine(temp);
+
+                sw.WriteLine(new string(EncryptData(temp)));
             }
-            sw.WriteLine("--|--");
+            sw.WriteLine(new string(EncryptData("--|--")));
 
             foreach (Criminal cr in MyCollection.criminalsDead)
             {
                 string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|",
                     cr.Surname, cr.Name, cr.Patronymic, cr.Nickname, cr.PlaceOfBirth, cr.DateOfBirth,
                     cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession);
-                sw.WriteLine(temp);
+
+                sw.WriteLine(new string(EncryptData(temp)));
             }
-            sw.WriteLine("--|--");
+            sw.WriteLine(new string(EncryptData("--|--")));
 
             foreach (Group gr in MyCollection.groups)
             {
-                sw.WriteLine(gr.Name + "$" + gr.CountOfCriminals);
+                sw.WriteLine(new string(EncryptData(gr.Name + "$" + gr.CountOfCriminals.ToString())));
 
-                sw.WriteLine("--|--");
+                sw.WriteLine(new string(EncryptData("--|--")));
             }
 
             ActionsWithFields.wasChangedData = false;
@@ -72,6 +75,7 @@ namespace Interpol_file_cabinet.DataAction
             {
                 if (fileName.Trim() == string.Empty)
                     return false;
+
                 FileStream fs = new FileStream(fileName, FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
                 Criminal crim = new Criminal();
@@ -85,11 +89,13 @@ namespace Interpol_file_cabinet.DataAction
 
                 while (!sr.EndOfStream)
                 {
-                    string[] tempStr = sr.ReadLine().Split('|');
+                    string[] tempStr = DecryptData(sr.ReadLine()).Split('|');
+                    // sr.ReadLine().Split('|');
 
                     while (tempStr[0] == "--")
                     {
-                        string temp = sr.ReadLine();
+                        string temp = DecryptData(sr.ReadLine());
+                        // sr.ReadLine();
                         if (temp == null)
                             break;
                         tempStr = temp.Split('|');
@@ -132,6 +138,9 @@ namespace Interpol_file_cabinet.DataAction
                     }
                 }
 
+                fs.Close();
+                sr.Close();
+
                 return true;
             }
             catch (Exception)
@@ -139,5 +148,45 @@ namespace Interpol_file_cabinet.DataAction
                 return false;
             }
         }
+
+        /// <summary>
+        /// Шифрует строку данных
+        /// </summary>
+        /// <param name="str">строка для шифрования</param>
+        /// <returns>массив зашифрованных символов</returns>
+        public static char[] EncryptData(string str)
+        {
+            char[] chArr = new char[str.Length];
+
+            for (int i = 0; i < chArr.Length; i++)
+            {
+                chArr[i] = (char)(str[i] + (i * 2) + 5);
+            }
+
+            return chArr;
+        }
+
+        /// <summary>
+        /// Расшифровывает строку данных
+        /// </summary>
+        /// <param name="str">строка для расшифрования</param>
+        /// <returns>массив расшифрованных символов</returns>
+        public static string DecryptData(string str)
+        {
+            if (str == null)
+                return null;
+
+            string res;
+            char[] chArr = new char[str.Length];
+
+            for (int i = 0; i < chArr.Length; i++)
+            {
+                chArr[i] = (char)((str[i] - (i * 2) - 5));
+            }
+
+            res = new string(chArr);
+            return res;
+        }
+
     }
 }
