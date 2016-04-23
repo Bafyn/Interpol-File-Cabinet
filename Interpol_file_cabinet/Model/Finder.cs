@@ -97,7 +97,7 @@ namespace Interpol_file_cabinet.Model
         {
             foreach (Group gr in MyCollection.groups)
             {
-                if (gr.Name.ToLower().Contains(searchPat) || gr.criminalsInGroup.Count.ToString().Contains(searchPat))
+                if (gr.Name.ToLower().Contains(searchPat) || gr.CountOfCriminals.ToString().Contains(searchPat))
                 {
                     DataGridViewRow row = ActionsWithFields.CreateRowOfGroup(gr);
 
