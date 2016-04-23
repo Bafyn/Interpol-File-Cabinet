@@ -8,7 +8,7 @@ namespace Interpol_file_cabinet.Model
 {
     public class Group
     {
-        // Свойства
+        // Поля
         public int CountOfCriminals;
         public string Name;
 
@@ -19,11 +19,7 @@ namespace Interpol_file_cabinet.Model
             CountOfCriminals = 0;
         }
 
-        public Group(string name)
-        {
-            this.Name = name;
-        }
-
+        // Конструктор копирования
         public Group(Group gr)
         {
             CountOfCriminals = gr.CountOfCriminals;
