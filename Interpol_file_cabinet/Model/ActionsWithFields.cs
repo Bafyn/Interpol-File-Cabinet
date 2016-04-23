@@ -14,7 +14,7 @@ namespace Interpol_file_cabinet.Model
         public static bool wasChangedData = false;
 
         /// <summary>
-        /// Проверка на соответствие текста регулярному выражению(только буквы)
+        /// Проверяет соответствие текста регулярному выражению (все, кроме букв)
         /// </summary>
         /// <param name="str">Строка, которую нужно проверить</param>
         /// <returns>Логическое значение</returns>
@@ -26,7 +26,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Проверка на соответствие текста регулярному выражению(только буквы и пробелы)
+        /// Проверяет соответствие текста регулярному выражению (кроме букв и пробелов)
         /// </summary>
         /// <param name="str">Строка, которую нужно проверить</param>
         /// <returns>Логическое значение</returns>
@@ -38,7 +38,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Проверка на соответствие названия группы регулярному выражению(только буквы, пробелы и цифры)
+        /// Проверяет соответствие названия группы регулярному выражению (кроме букв, пробелов и цифр)
         /// </summary>
         /// <param name="str">Название группы</param>
         /// <returns>Логическое значение</returns>
@@ -49,7 +49,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Конвертировать строку DataGridViewRow в Criminal
+        /// Конвертирует строку DataGridViewRow в Criminal
         /// </summary>
         /// <param name="row">Строка DataGridView</param>
         /// <returns>Объект Criminal</returns>
@@ -72,7 +72,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Перевести строку DataGridView, содержащую CheckBox в Criminal
+        /// Переводит строку DataGridView, содержащую CheckBox, в Criminal
         /// </summary>
         /// <param name="row">Строка DataGridView с CheckBox</param>
         /// <returns>Объект Criminal</returns>
@@ -87,7 +87,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Конвертировать объект типа Criminal в DataGridViewRow
+        /// Конвертирует объект типа Criminal в DataGridViewRow
         /// </summary>
         /// <param name="cr">Объект типа Criminal</param>
         /// <param name="addCheckBox">Логическое значение, указывающее, стоит ли добавить CheckBox в строку</param>
@@ -119,6 +119,7 @@ namespace Interpol_file_cabinet.Model
             signs.Value = cr.SpecialSigns;
             DataGridViewCell prof = new DataGridViewTextBoxCell();
             prof.Value = cr.Profession;
+
             if (addCheckBox == true)
             {
                 DataGridViewCell chB = new DataGridViewCheckBoxCell();
@@ -150,7 +151,7 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Конвертировать объект типа Group в DataGridViewRow
+        /// Конвертирует объект типа Group в DataGridViewRow
         /// </summary>
         /// <param name="gr">Объект типа Group</param>
         /// <returns>DataGridViewRow</returns>
@@ -161,14 +162,13 @@ namespace Interpol_file_cabinet.Model
             DataGridViewCell name = new DataGridViewTextBoxCell();
             name.Value = gr.Name;
             DataGridViewCell num = new DataGridViewTextBoxCell();
-            num.Value = gr.criminalsInGroup.Count;
+            num.Value = gr.CountOfCriminals;
 
             row.Cells.Add(name);
             row.Cells.Add(num);
             row.Height = 40;
 
             return row;
-
         }
     }
 }
