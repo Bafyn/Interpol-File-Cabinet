@@ -22,6 +22,10 @@ namespace Interpol_file_cabinet
             comboBSearchMain.SelectedIndex = 0;
             comboBSearchArchive.SelectedIndex = 0;
             comboBSearchDead.SelectedIndex = 0;
+            foreach (string str in new Add_Criminal().Controls.OfType<ComboBox>().First().Items)
+            {
+                MyCollection.professions.Add(str);
+            }
         }
 
         public Criminal tempCr;
@@ -29,9 +33,98 @@ namespace Interpol_file_cabinet
         public Add_Criminal addCr;
         public About about;
 
+        /// <summary>
+        /// Добавляет преступника в DataGridView
+        /// </summary>
+        /// <param name="crim">объект типа Criminal</param>
+        /// <param name="numOfDivision">Число, указывающее, куда записать преступника(принимает занчения от 0 до 3)</param>
+        /// <param name="addToList">Логическое значение, указывающее, добавить ли преступника в коллекцию MyCollection</param>
+        /// <param name="addGroupToRow">Логическое значение, указывающее, добавить ли в строку название группировки</param>
+        public void AddCriminal(Criminal crim, int numOfDivision, bool addToList, bool addGroupToRow)
+        {
+            // Создать строку с преступником
+            DataGridViewRow row = ActionsWithFields.CreateRowOfCriminal(crim, false, addGroupToRow);
+
+            if (addToList == true)
+            {
+                switch (numOfDivision)
+                {
+                    case 0:
+                        MyCollection.criminals.Add(crim);
+                        break;
+                    case 1:
+                        MyCollection.criminalsArchive.Add(crim);
+                        break;
+                    case 2:
+                        MyCollection.criminalsDead.Add(crim);
+                        break;
+                }
+            }
+
+            switch (numOfDivision)
+            {
+                case 0:
+                    this.dataGVCriminals.Rows.Add(row);
+                    break;
+                case 1:
+                    this.dataGVArchive.Rows.Add(row);
+                    break;
+                case 2:
+                    DataGridViewTextBoxCell dateOfDeath = new DataGridViewTextBoxCell();
+                    dateOfDeath.Value = crim.DateOfDeath;
+                    row.Cells.Add(dateOfDeath);
+                    this.dataGVDead.Rows.Add(row);
+                    break;
+                case 3:
+                    this.dataGVMembers.Rows.Add(row);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Изменяет строку в DataGridView после редактирования
+        /// </summary>
+        /// <param name="crim">Уже отредактированный преступник</param>
+        public void ChangeRow(Criminal crim)
+        {
+            MethodsForMainForm.ChangeRowInForm(dataGVCriminals, crim);
+        }
+
+        /// <summary>
+        /// Изменяет группу преступника в DataGridView
+        /// </summary>
+        /// <param name="crim">Преступник, у которого поменялась группировка</param>
+        /// <param name="nameOfGroup">Имя новой группировки</param>
+        public void ChangeGroupOfCriminalInRow(Criminal crim, string nameOfGroup)
+        {
+            foreach (DataGridViewRow row in dataGVCriminals.Rows)
+            {
+                if (ActionsWithFields.ConvertToCriminal(row) == crim)
+                    row.Cells[11].Value = nameOfGroup;
+            }
+        }
+
+        /// <summary>
+        /// Добавляет строку группировки в DataGridView
+        /// </summary>
+        /// <param name="row">Строка для добавления</param>
+        public void AddGroupToDataGV(DataGridViewRow row)
+        {
+            this.dataGVGroups.Rows.Add(row);
+        }
+
+        /// <summary>
+        ///  Увеличивает количество преступников в группировке на 1
+        /// </summary>
+        public void IncrNumOfCriminalsInGroupInDataGV()
+        {
+            dataGVGroups.CurrentRow.Cells[1].Value = Convert.ToInt32(dataGVGroups.CurrentRow.Cells[1].Value) + 1;
+        }
+
+
         private void сохранитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.InitialDirectory = "D:\\Data";
+            saveFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
             saveFileDialog1.Filter = "txt files (*.txt)|*.txt";
             saveFileDialog1.FilterIndex = 0;
             saveFileDialog1.Title = "Сохранить файл";
@@ -44,7 +137,7 @@ namespace Interpol_file_cabinet
 
         private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.InitialDirectory = "D:\temp";
+            openFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             openFileDialog1.FilterIndex = 0;
             openFileDialog1.CheckFileExists = true;
@@ -120,15 +213,13 @@ namespace Interpol_file_cabinet
         private void btnAddToArchive_Click(object sender, EventArgs e)
         {
             // Добавить преступника в архив
-            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, MyCollection.criminalsArchive, 1);
-            MethodsForMainForm.ChangeNumOfCriminalsInGroupInDataGV(dataGVGroups);
+            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsArchive, 1, this);
         }
 
         private void btnAddToDead_Click(object sender, EventArgs e)
         {
             // Добавить преступника к умершим
-            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, MyCollection.criminalsDead, 2);
-            MethodsForMainForm.ChangeNumOfCriminalsInGroupInDataGV(dataGVGroups);
+            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsDead, 2, this);
         }
 
         // Добавить преступника на главную панель
@@ -161,6 +252,7 @@ namespace Interpol_file_cabinet
             Criminal newCrim = MyCollection.criminalsArchive.Find(key => key == ActionsWithFields.ConvertToCriminal(dataGVArchive.CurrentRow));
 
             MyCollection.criminalsArchive.Remove(newCrim);
+            newCrim.DateOfDeath = DateTime.Now.ToShortDateString();
             MyCollection.criminalsDead.Add(newCrim);
             AddCriminal(newCrim, 2, false, false);
             dataGVArchive.Rows.Remove(dataGVArchive.CurrentRow);
@@ -322,6 +414,7 @@ namespace Interpol_file_cabinet
                 return;
 
             dataGVGroups.Rows.Clear();
+            dataGVMembers.Rows.Clear();
 
             Finder.ShowSortedGroups(this, searchPattern);
         }
@@ -421,92 +514,6 @@ namespace Interpol_file_cabinet
         private void выйтиToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-
-        /// <summary>
-        /// Добавить преступника в DataGridView
-        /// </summary>
-        /// <param name="crim">объект типа Criminal</param>
-        /// <param name="numOfDivision">Число, указывающее, куда записать преступника(принимает занчения от 0 до 3)</param>
-        /// <param name="addToList">Логическое значение, указывающее, добавить ли преступника в коллекцию MyCollection</param>
-        /// <param name="addGroupToRow">Логическое значение, указывающее, добавить ли в строку название группировки</param>
-        public void AddCriminal(Criminal crim, int numOfDivision, bool addToList, bool addGroupToRow)
-        {
-            // Создать строку с преступником
-            DataGridViewRow row = ActionsWithFields.CreateRowOfCriminal(crim, false, addGroupToRow);
-
-            if (addToList == true)
-            {
-                switch (numOfDivision)
-                {
-                    case 0:
-                        MyCollection.criminals.Add(crim);
-                        break;
-                    case 1:
-                        MyCollection.criminalsArchive.Add(crim);
-                        break;
-                    case 2:
-                        MyCollection.criminalsDead.Add(crim);
-                        break;
-                }
-            }
-
-            switch (numOfDivision)
-            {
-                case 0:
-                    this.dataGVCriminals.Rows.Add(row);
-                    break;
-                case 1:
-                    this.dataGVArchive.Rows.Add(row);
-                    break;
-                case 2:
-                    this.dataGVDead.Rows.Add(row);
-                    break;
-                case 3:
-                    this.dataGVMembers.Rows.Add(row);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Изменяет строку в DataGridView после редактирования
-        /// </summary>
-        /// <param name="crim">Уже отредактированный преступник</param>
-        public void ChangeRow(Criminal crim)
-        {
-            MethodsForMainForm.ChangeRowInForm(dataGVCriminals, crim);
-        }
-
-        /// <summary>
-        /// Изменяет группу преступника в DataGridView
-        /// </summary>
-        /// <param name="crim">Преступник, у которого поменялась группировка</param>
-        /// <param name="nameOfGroup">Имя новой группировки</param>
-        public void ChangeGroupOfCriminalInRow(Criminal crim, string nameOfGroup)
-        {
-            foreach (DataGridViewRow row in dataGVCriminals.Rows)
-            {
-                if (ActionsWithFields.ConvertToCriminal(row) == crim)
-                    row.Cells[11].Value = nameOfGroup;
-            }
-        }
-
-        /// <summary>
-        /// Добавляет строку группировки в DataGridView
-        /// </summary>
-        /// <param name="row">Строка для добавления</param>
-        public void AddGroupToDataGV(DataGridViewRow row)
-        {
-            this.dataGVGroups.Rows.Add(row);
-        }
-
-        /// <summary>
-        ///  Увеличивает количество преступников в группировке на 1
-        /// </summary>
-        public void IncrNumOfCriminalsInGroupInDataGV()
-        {
-            dataGVGroups.CurrentRow.Cells[1].Value = Convert.ToInt32(dataGVGroups.CurrentRow.Cells[1].Value) + 1;
         }
     }
 }
