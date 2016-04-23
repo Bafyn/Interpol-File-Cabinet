@@ -11,7 +11,7 @@ namespace Interpol_file_cabinet.DataAction
     static class DataAccess
     {
         /// <summary>
-        /// Сохранение данных в файл
+        /// Сохраняет данные в файл
         /// </summary>
         /// <param name="fileName">Путь для сохранения файла</param>
         public static void Save(string fileName)
@@ -21,6 +21,12 @@ namespace Interpol_file_cabinet.DataAction
 
             FileStream fs = new FileStream(fileName, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
+
+            foreach (string str in MyCollection.professions)
+            {
+                sw.WriteLine(EncryptData(str));
+            }
+            sw.WriteLine(new string(EncryptData("-||-")));
 
             foreach (Criminal cr in MyCollection.criminals)
             {
@@ -44,9 +50,9 @@ namespace Interpol_file_cabinet.DataAction
 
             foreach (Criminal cr in MyCollection.criminalsDead)
             {
-                string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|",
+                string temp = string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}",
                     cr.Surname, cr.Name, cr.Patronymic, cr.Nickname, cr.PlaceOfBirth, cr.DateOfBirth,
-                    cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession);
+                    cr.Height, cr.Weight, cr.EyeColor, cr.SpecialSigns, cr.Profession, cr.DateOfDeath);
 
                 sw.WriteLine(new string(EncryptData(temp)));
             }
@@ -65,7 +71,7 @@ namespace Interpol_file_cabinet.DataAction
         }
 
         /// <summary>
-        /// Загрузка данных из файла
+        /// Загружает данные из файла
         /// </summary>
         /// <param name="fileName">Путь к файлу</param>
         /// <returns>Логическое значение, возвращающее успешность загрузки</returns>
@@ -86,6 +92,13 @@ namespace Interpol_file_cabinet.DataAction
                 MyCollection.criminalsArchive.Clear();
                 MyCollection.criminalsDead.Clear();
                 MyCollection.groups.Clear();
+
+                string profStr = DecryptData(sr.ReadLine());
+                while (profStr != "-||-")
+                {
+                    MyCollection.professions.Add(profStr);
+                    profStr = DecryptData(sr.ReadLine());
+                }
 
                 while (!sr.EndOfStream)
                 {
@@ -112,6 +125,8 @@ namespace Interpol_file_cabinet.DataAction
                             Convert.ToDouble(tempStr[6]), Convert.ToDouble(tempStr[7]), tempStr[8], tempStr[9], tempStr[10]);
                         if (numOfPart == 0)
                             crim.Group = tempStr[11];
+                        if (numOfPart == 2)
+                            crim.DateOfDeath = tempStr[11];
                     }
 
                     if (numOfPart >= 3 && tempStr.Length == 1)
@@ -187,6 +202,5 @@ namespace Interpol_file_cabinet.DataAction
             res = new string(chArr);
             return res;
         }
-
     }
 }
