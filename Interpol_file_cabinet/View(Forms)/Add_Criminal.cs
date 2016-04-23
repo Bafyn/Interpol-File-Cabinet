@@ -18,6 +18,29 @@ namespace Interpol_file_cabinet.Forms
             InitializeComponent();
             this.AcceptButton = btnAddCriminal;
             this.dateTCriminalDateOfBirth.MaxDate = DateTime.Now;
+            comboBProfessions.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Заполняет поля формы значениями строки, выбранной для редактирования
+        /// </summary>
+        /// <param name="row">Строка DataGridView, с которой берутся данные</param>
+        public void ChangeFields(DataGridViewRow row)
+        {
+            this.textBCriminalSurname.Text = row.Cells[0].Value.ToString();
+            this.textBCriminalName.Text = row.Cells[1].Value.ToString();
+            this.textBCriminalPatronymic.Text = row.Cells[2].Value.ToString();
+            this.textBCriminalNickname.Text = row.Cells[3].Value.ToString();
+            this.textBCriminalPlaceOfBirth.Text = row.Cells[4].Value.ToString();
+            this.dateTCriminalDateOfBirth.Value = Convert.ToDateTime(row.Cells[5].Value);
+            this.numericCriminalHeight.Text = row.Cells[6].Value.ToString();
+            this.numericCriminalWeight.Text = row.Cells[7].Value.ToString();
+            this.textBCriminalEyeColor.Text = row.Cells[8].Value.ToString();
+            this.textBCriminalSigns.Text = row.Cells[9].Value.ToString();
+            this.textBCriminalProfession.Text = row.Cells[10].Value.ToString();
+
+            this.btnAddCriminal.Text = "Изменить";
+            this.Text = "Редактировать преступника";
         }
 
         private void buttonAddCriminal_Click(object sender, EventArgs e)
@@ -53,15 +76,17 @@ namespace Interpol_file_cabinet.Forms
                 textBCriminalSigns.BackColor = Color.White;
             }
 
-            if (textBCriminalProfession.Text.Trim() == string.Empty ||
-                ActionsWithFields.CheckWithRegexWithSpaces(textBCriminalProfession.Text))
+            if (textBCriminalProfession.Text.Trim() != string.Empty)
             {
-                textBCriminalProfession.BackColor = Color.LightPink;
-                flagErrorInFields = 1;
-            }
-            else
-            {
-                textBCriminalProfession.BackColor = Color.White;
+                if (ActionsWithFields.CheckWithRegexWithSpaces(textBCriminalProfession.Text))
+                {
+                    textBCriminalProfession.BackColor = Color.LightPink;
+                    flagErrorInFields = 1;
+                }
+                else
+                {
+                    textBCriminalProfession.BackColor = Color.White;
+                }
             }
 
             if (flagErrorInFields == 1)
@@ -75,6 +100,7 @@ namespace Interpol_file_cabinet.Forms
             {
                 if (cr.Surname.ToLower() == textBCriminalSurname.Text.ToLower() &&
                     cr.Name.ToLower() == textBCriminalName.Text.ToLower() &&
+                    cr.Nickname.ToLower() == textBCriminalNickname.Text.ToLower() &&
                     cr.Patronymic.ToLower() == textBCriminalPatronymic.Text.ToLower() &&
                     cr.PlaceOfBirth.ToLower() == textBCriminalPlaceOfBirth.Text.ToLower() &&
                     cr.DateOfBirth == dateTCriminalDateOfBirth.Value.ToShortDateString() &&
@@ -90,14 +116,23 @@ namespace Interpol_file_cabinet.Forms
             }
 
             // Создание нового преступника
+            string prof = textBCriminalProfession.Text.Trim() == string.Empty ?
+                comboBProfessions.SelectedItem.ToString() : textBCriminalProfession.Text;
+            if (textBCriminalProfession.Text.Trim() != string.Empty &&
+                !MyCollection.professions.Contains(textBCriminalProfession.Text.Trim()))
+            {
+                MyCollection.professions.Add(textBCriminalProfession.Text);
+            }
             crim = new Criminal(textBCriminalSurname.Text, textBCriminalName.Text, textBCriminalPatronymic.Text,
                 textBCriminalNickname.Text, textBCriminalPlaceOfBirth.Text, dateTCriminalDateOfBirth.Value.ToShortDateString(),
                 Convert.ToDouble(numericCriminalHeight.Value), Convert.ToDouble(numericCriminalWeight.Value),
-                textBCriminalEyeColor.Text, textBCriminalSigns.Text, textBCriminalProfession.Text);
+                textBCriminalEyeColor.Text, textBCriminalSigns.Text, prof);
             mf = (MainForm)Owner;
 
+            // Если форма открыта для добавления преступника
             if (this.btnAddCriminal.Text == "Добавить")
                 mf.AddCriminal(crim, 0, true, true);
+            // Если форма открыта для редактирования
             else
                 mf.ChangeRow(crim);
 
@@ -106,27 +141,20 @@ namespace Interpol_file_cabinet.Forms
             Close();
         }
 
-        /// <summary>
-        /// Заполняет поля формы значениями строки, выбранной для редактирования
-        /// </summary>
-        /// <param name="row">Строка DataGridView, с которой берутся данные</param>
-        public void ChangeFields(DataGridViewRow row)
+        private void Add_Criminal_Load(object sender, EventArgs e)
         {
-            this.textBCriminalSurname.Text = row.Cells[0].Value.ToString();
-            this.textBCriminalName.Text = row.Cells[1].Value.ToString();
-            this.textBCriminalPatronymic.Text = row.Cells[2].Value.ToString();
-            this.textBCriminalNickname.Text = row.Cells[3].Value.ToString();
-            this.textBCriminalPlaceOfBirth.Text = row.Cells[4].Value.ToString();
-            this.dateTCriminalDateOfBirth.Value = Convert.ToDateTime(row.Cells[5].Value);
-            this.numericCriminalHeight.Text = row.Cells[6].Value.ToString();
-            this.numericCriminalWeight.Text = row.Cells[7].Value.ToString();
-            this.textBCriminalEyeColor.Text = row.Cells[8].Value.ToString();
-            this.textBCriminalSigns.Text = row.Cells[9].Value.ToString();
-            this.textBCriminalProfession.Text = row.Cells[10].Value.ToString();
-
-            this.btnAddCriminal.Text = "Изменить";
-            this.Text = "Редактировать преступника";
+            foreach (string str in MyCollection.professions)
+            {
+                if (!comboBProfessions.Items.Contains(str))
+                {
+                    comboBProfessions.Items.Add(str);
+                }
+            }
         }
 
+        private void comboBProfessions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBCriminalProfession.Text = comboBProfessions.SelectedItem.ToString();
+        }
     }
 }
