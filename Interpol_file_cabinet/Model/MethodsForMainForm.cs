@@ -10,7 +10,7 @@ namespace Interpol_file_cabinet.Model
     static class MethodsForMainForm
     {
         /// <summary>
-        /// Изменяет строку в DataGridView после редактирования
+        /// Изменяет строку с преступником в DataGridView после редактирования
         /// </summary>
         /// <param name="DGV">DataGridView в котором нужно осуществить перезапись</param>
         /// <param name="crim">Уже отредактированный преступник</param>
@@ -39,12 +39,12 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Переместить преступника с главной панели
+        /// Перемещает преступника с главной панели
         /// </summary>
         /// <param name="DGV">DataGridView в который добавить преступника</param>
         /// <param name="list">Новое место расположения преступника</param>
         /// <param name="numOfDiv">Номер пнаели, куда поместить преступника</param>
-        public static void MoveCriminalFromMainTable(DataGridView DGV, List<Criminal> list, int numOfDiv)
+        public static void MoveCriminalFromMainTable(DataGridView DGV, DataGridView DGVGroups, List<Criminal> list, int numOfDiv, MainForm MForm)
         {
             if (DGV.CurrentCell == null)
             {
@@ -52,13 +52,12 @@ namespace Interpol_file_cabinet.Model
                 return;
             }
 
-            MainForm MForm = new MainForm();
             Criminal newCrim = MyCollection.criminals.Find(key => key == ActionsWithFields.ConvertToCriminal(DGV.CurrentRow));
 
             // Удалить перступника с главной панели
             MyCollection.criminals.Remove(newCrim);
 
-            // Если преступник состоит в группировке, удалить его и оттуда(уменьшить кол-во членов)
+            // Если преступник состоит в группировке, удалить его и оттуда (уменьшить кол-во членов)
             if (newCrim.Group != "")
             {
                 for (int i = 0; i < MyCollection.groups.Count; i++)
@@ -70,18 +69,14 @@ namespace Interpol_file_cabinet.Model
                     }
                 }
 
-                //Уменьшить кол-во преступников в группировке на 1
-                foreach (DataGridViewRow row in DGV.Rows)
-                {
-                    if (row.Cells[0].Value.ToString() == newCrim.Group)
-                    {
-                        row.Cells[1].Value = (Convert.ToInt32(row.Cells[1].Value) - 1).ToString();
-                        break;
-                    }
-                }
+                ChangeNumOfCriminalsInGroupInDataGV(DGVGroups, newCrim);
             }
 
             newCrim.Group = "";
+            if (numOfDiv == 2)
+            {
+                newCrim.DateOfDeath = DateTime.Now.ToShortDateString();
+            }
             list.Add(newCrim);
             MForm.AddCriminal(newCrim, numOfDiv, false, false);
             DGV.Rows.Remove(DGV.CurrentRow);
@@ -90,17 +85,16 @@ namespace Interpol_file_cabinet.Model
         }
 
         /// <summary>
-        /// Изменяет кол-во подельщиков в группировке в ячейке DataGridView
+        /// Изменяет кол-во подельщиков в группировке в ячейке DataGridView на панели группировок
         /// </summary>
         /// <param name="DGV">DataGridView в котором надо поменять кол-во подельщиков</param>
-        public static void ChangeNumOfCriminalsInGroupInDataGV(DataGridView DGV)
+        private static void ChangeNumOfCriminalsInGroupInDataGV(DataGridView DGV, Criminal crim)
         {
             foreach (DataGridViewRow row in DGV.Rows)
             {
-                foreach (Group group in MyCollection.groups)
+                if (row.Cells[0].Value.ToString() == crim.Group)
                 {
-                    if (row.Cells[0].Value.ToString() == group.Name)
-                        row.Cells[1].Value = group.CountOfCriminals;
+                    row.Cells[1].Value = Convert.ToInt32(row.Cells[1].Value) - 1;
                 }
             }
         }
