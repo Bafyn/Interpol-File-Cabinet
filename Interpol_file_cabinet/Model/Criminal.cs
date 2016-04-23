@@ -24,6 +24,7 @@ namespace Interpol_file_cabinet.Model
             SpecialSigns = specialSigns;
             Profession = profession;
             Group = "";
+            DateOfDeath = "";
         }
 
         // Конструктор по умолчанию.
@@ -42,6 +43,7 @@ namespace Interpol_file_cabinet.Model
         public string SpecialSigns { get; set; }
         public string Profession { get; set; }
         public string Group { get; set; }
+        public string DateOfDeath { get; set; }
 
         // Переопределение оператора "=="
         public static bool operator ==(Criminal cr1, Criminal cr2)
