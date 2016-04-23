@@ -12,6 +12,7 @@ namespace Interpol_file_cabinet.Model
         public static List<Criminal> criminalsArchive;
         public static List<Criminal> criminalsDead;
         public static List<Group> groups;
+        public static List<string> professions;
 
         // Статический конструктор
         static MyCollection()
@@ -20,6 +21,7 @@ namespace Interpol_file_cabinet.Model
             criminalsArchive = new List<Criminal>();
             criminalsDead = new List<Criminal>();
             groups = new List<Group>();
+            professions = new List<string>();
         }
     }
 }
