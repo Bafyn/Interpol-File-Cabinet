@@ -44,7 +44,7 @@ namespace Interpol_file_cabinet.Model
         /// <param name="DGV">DataGridView в который добавить преступника</param>
         /// <param name="list">Новое место расположения преступника</param>
         /// <param name="numOfDiv">Номер пнаели, куда поместить преступника</param>
-        public static void MoveCriminalFromMainTable(DataGridView DGV, DataGridView DGVGroups, List<Criminal> list, int numOfDiv, MainForm MForm)
+        public static void MoveCriminalFromMainTable(DataGridView DGV, DataGridView DGVGroups, List<Criminal> list, int numOfDiv, MainForm MForm, DateTime dateOfDeath)
         {
             if (DGV.CurrentCell == null)
             {
@@ -75,7 +75,7 @@ namespace Interpol_file_cabinet.Model
             newCrim.Group = "";
             if (numOfDiv == 2)
             {
-                newCrim.DateOfDeath = DateTime.Now.ToShortDateString();
+                newCrim.DateOfDeath = dateOfDeath.ToShortDateString();
             }
             list.Add(newCrim);
             MForm.AddCriminal(newCrim, numOfDiv, false, false);
