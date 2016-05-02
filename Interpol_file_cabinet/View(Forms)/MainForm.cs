@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Interpol_file_cabinet.Forms;
 using Interpol_file_cabinet.Model;
 using Interpol_file_cabinet.DataAction;
+using Interpol_file_cabinet.View_Forms_;
 using Interpol_file_cabinet.Forms_View_;
 
 namespace Interpol_file_cabinet
@@ -32,6 +33,7 @@ namespace Interpol_file_cabinet
         public Add_Group addGr;
         public Add_Criminal addCr;
         public About about;
+        public DateOfDeath dateOfD;
 
         /// <summary>
         /// Добавляет преступника в DataGridView
@@ -213,13 +215,27 @@ namespace Interpol_file_cabinet
         private void btnAddToArchive_Click(object sender, EventArgs e)
         {
             // Добавить преступника в архив
-            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsArchive, 1, this);
+            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsArchive, 1, this, DateTime.Now);
         }
 
         private void btnAddToDead_Click(object sender, EventArgs e)
         {
             // Добавить преступника к умершим
-            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsDead, 2, this);
+            if (dataGVCriminals.CurrentRow == null)
+            {
+                MessageBox.Show("Выберите преступника", "Ошибка");
+                return;
+            }
+
+            string temp = string.Format("{0} {1} {2}", dataGVCriminals.CurrentRow.Cells[0].Value.ToString(),
+                dataGVCriminals.CurrentRow.Cells[1].Value.ToString(), dataGVCriminals.CurrentRow.Cells[2].Value.ToString());
+            dateOfD = new DateOfDeath(temp, true);
+            dateOfD.ShowDialog(this);
+        }
+        public void AddToDead(DateTime dt)
+        {
+            MethodsForMainForm.MoveCriminalFromMainTable(dataGVCriminals, dataGVGroups, MyCollection.criminalsDead, 2,
+                this, dt);
         }
 
         // Добавить преступника на главную панель
@@ -249,10 +265,18 @@ namespace Interpol_file_cabinet
                 return;
             }
 
+            string temp = string.Format("{0} {1} {2}", dataGVArchive.CurrentRow.Cells[0].Value.ToString(),
+    dataGVArchive.CurrentRow.Cells[1].Value.ToString(), dataGVArchive.CurrentRow.Cells[2].Value.ToString());
+            dateOfD = new DateOfDeath(temp, false);
+            dateOfD.ShowDialog(this);
+
+        }
+        public void AddToDeadFromArchive(DateTime dt)
+        {
             Criminal newCrim = MyCollection.criminalsArchive.Find(key => key == ActionsWithFields.ConvertToCriminal(dataGVArchive.CurrentRow));
 
             MyCollection.criminalsArchive.Remove(newCrim);
-            newCrim.DateOfDeath = DateTime.Now.ToShortDateString();
+            newCrim.DateOfDeath = dt.ToShortDateString();
             MyCollection.criminalsDead.Add(newCrim);
             AddCriminal(newCrim, 2, false, false);
             dataGVArchive.Rows.Remove(dataGVArchive.CurrentRow);
@@ -313,6 +337,10 @@ namespace Interpol_file_cabinet
                     }
                 }
                 dataGVGroups.Rows.Remove(dataGVGroups.CurrentRow);
+                if (dataGVGroups.Rows.Count == 0)
+                {
+                    dataGVMembers.Rows.Clear();
+                }
                 ActionsWithFields.wasChangedData = true;
             }
         }
@@ -357,7 +385,7 @@ namespace Interpol_file_cabinet
 
             Add_Group AG = new Add_Group();
             TextBox tb = (TextBox)AG.Controls.Find("textBGroupName", false)[0];
-
+            AG.Text = "Добавить преступника";
             tb.ReadOnly = true;
             tb.Text = dataGVGroups.CurrentRow.Cells[0].Value.ToString();
 
