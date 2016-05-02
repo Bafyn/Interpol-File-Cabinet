@@ -23,6 +23,39 @@ namespace Interpol_file_cabinet.Model
         {
             foreach (Criminal crim in list)
             {
+                if (numOfDiv == 2 && cb.SelectedIndex == 11)
+                {
+                    if (crim.DateOfDeath.ToLower().Contains(searchPat))
+                    {
+                        form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
+                    }
+                    continue;
+                }
+
+                if (((numOfDiv == 0 || numOfDiv == 2) && cb.SelectedIndex == 12) || (numOfDiv == 1 && cb.SelectedIndex == 11))
+                {
+                    if (crim.Surname.ToLower().Contains(searchPat) || crim.Name.ToLower().Contains(searchPat) ||
+                            crim.Patronymic.ToLower().Contains(searchPat) || crim.Nickname.ToLower().Contains(searchPat) ||
+                            crim.PlaceOfBirth.ToLower().Contains(searchPat) || crim.DateOfBirth.ToLower().Contains(searchPat) ||
+                            crim.Height.ToString() == searchPat || crim.Weight.ToString() == searchPat ||
+                            crim.EyeColor.ToLower().Contains(searchPat) || crim.SpecialSigns.ToLower().Contains(searchPat) ||
+                            crim.Profession.ToLower().Contains(searchPat) || crim.Group.ToLower().Contains(searchPat) ||
+                            crim.DateOfDeath.ToLower().Contains(searchPat))
+                    {
+                        form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
+                    }
+                    continue;
+                }
+
+                if (numOfDiv == 0 && cb.SelectedIndex == 11)
+                {
+                    if (crim.Group.ToLower().Contains(searchPat))
+                    {
+                        form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
+                    }
+                    continue;
+                }
+
                 switch (cb.SelectedIndex)
                 {
                     case 0:
@@ -68,21 +101,6 @@ namespace Interpol_file_cabinet.Model
                     case 10:
                         if (crim.Profession.ToLower().Contains(searchPat))
                             form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
-                        break;
-                    case 11:
-                        if (crim.Group.ToLower().Contains(searchPat))
-                            form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
-                        break;
-                    case 12:
-                        if (crim.Surname.ToLower().Contains(searchPat) || crim.Name.ToLower().Contains(searchPat) ||
-                            crim.Patronymic.ToLower().Contains(searchPat) || crim.Nickname.ToLower().Contains(searchPat) ||
-                            crim.PlaceOfBirth.ToLower().Contains(searchPat) || crim.DateOfBirth.ToLower().Contains(searchPat) ||
-                            crim.Height.ToString() == searchPat || crim.Weight.ToString() == searchPat ||
-                            crim.EyeColor.ToLower().Contains(searchPat) || crim.SpecialSigns.ToLower().Contains(searchPat) ||
-                            crim.Profession.ToLower().Contains(searchPat) || crim.Group.ToLower().Contains(searchPat))
-                        {
-                            form.AddCriminal(crim, numOfDiv, false, addGroupToRow);
-                        }
                         break;
                 }
             }
